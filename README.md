@@ -11,6 +11,7 @@ The interface is in **Turkish**, with dark and light themes. No account, cloud s
 - **Graphics modes:** hybrid, integrated Intel, NVIDIA, and compute. Saved configuration and actual GPU runtime state are shown separately.
 - **Power and firmware:** Pop!_OS power profiles, supported Lenovo firmware profiles, and an optional Fn+Q on-screen indicator.
 - **Battery:** charge, capacity, health, cycle count, and conservation-mode status when exposed by Linux.
+- **Keyboard lighting:** off, low, and high on two-step ThinkBook backlights, or an integer slider for devices with more levels; changes are verified through UPower.
 - **System:** CPU load and temperature, memory, storage, session activity, and redacted diagnostic export.
 - **Interface:** responsive layout, reduced-motion support, bundled fonts, and custom static hardware artwork.
 
@@ -30,7 +31,7 @@ On Pop!_OS / Ubuntu 24.04, install the desktop dependencies:
 
 ```bash
 sudo apt update
-sudo apt install git python3 python3-pyqt6 python3-pyqt6.qtwebengine python3-pyqt6.qtwebchannel
+sudo apt install git python3 python3-pyqt6 python3-pyqt6.qtwebengine python3-pyqt6.qtwebchannel upower
 ```
 
 `system76-power` is supplied by Pop!_OS. Confirm it is available with `system76-power profile`. Installing this application does not install GPU drivers or configure another distribution's power-management service.
@@ -72,11 +73,17 @@ The “Discrete GPU is active” desktop warning reflects hardware state. Saving
 - The desktop view disables GPU compositing and WebGL. Artwork is static and stored locally.
 - Firmware changes use a `pkexec` authentication prompt; the entire dashboard should not run as root.
 
+## Keyboard backlight
+
+Open **Güç ve pil → Klavye aydınlatması** and choose **Kapalı**, **Düşük**, or **Yüksek**. The control uses the brightness steps reported by the device. On the tested ThinkBook these are 0, 1, and 2; it does not treat them as a 0–100 hardware range. ThinkBook's **Fn + Space** shortcut also changes the backlight; the dashboard refreshes its displayed level while focused.
+
+Changes go through the documented [UPower keyboard backlight interface](https://upower.freedesktop.org/docs/KbdBacklight.html), using `busctl` from systemd. No direct sysfs write permissions or custom root helper are needed. If UPower is unavailable or the device does not expose a supported backlight, the panel shows the reason and omits the controls. Failed writes or a readback mismatch are reported as errors, without changing the displayed selection to the requested value.
+
 ## Development and verification
 
 ```bash
 # Hardware/service tests: do not apply real settings
-python3 -m unittest -v test_graphics test_service
+python3 -m unittest -v test_graphics test_service test_keyboard
 
 # UI build and browser tests with a mocked Qt bridge
 npm ci --prefix ui
@@ -97,6 +104,7 @@ The native smoke test uses the real read-only bridge and writes `/tmp/thinkbook-
 | `native.py` | Desktop shell, local-only request policy, Qt bridge, single-instance handling |
 | `service.py` | Fixed action list, serialized settings changes, verification and diagnostics |
 | `hardware.py` | Linux hardware probes and system76-power integration |
+| `keyboard.py` | UPower keyboard brightness discovery, validation and verified writes |
 | `ui/src` | React, TypeScript, Tailwind and Rare UI components |
 | `assets` | Original artwork and generation prompts |
 | `install.py` | User-level runtime and launcher installation |

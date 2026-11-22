@@ -10,6 +10,7 @@ import threading
 import time
 
 import hardware
+import keyboard
 
 BASE = Path(__file__).resolve().parent
 
@@ -92,7 +93,7 @@ class DashboardService:
                                   percent=round(100 * disk.used / disk.total)),
                         battery={**battery_info(), 'conservation': conservation},
                         firmware=dict(mode=profile, choices=(choices or '').split()),
-                        gpu=hardware.gpu_status(), busy=self.busy,
+                        gpu=hardware.gpu_status(), keyboard=keyboard.status(), busy=self.busy,
                         events=list(self.events[-12:]), **self.metadata)
 
     def event(self, title, ok):
@@ -118,7 +119,7 @@ class DashboardService:
             text = json.dumps(snapshot, ensure_ascii=False, indent=2)
             text = text.replace(str(Path.home()), '[ev klasörü]').replace(getpass.getuser(), '[kullanıcı]')
             return dict(text=text)
-        if action not in ('graphics', 'power', 'firmware', 'reboot'):
+        if action not in ('graphics', 'power', 'firmware', 'keyboard', 'reboot'):
             raise ValueError('Desteklenmeyen işlem.')
         if not self.action_lock.acquire(blocking=False):
             raise RuntimeError('Başka bir ayar uygulanıyor. Tamamlanmasını bekle.')
@@ -139,6 +140,10 @@ class DashboardService:
                 if error or check_error or actual != hardware.PROFILES[selection]:
                     raise RuntimeError(error or check_error or 'Güç profili doğrulanamadı.')
                 message = 'Güç profili uygulandı.'
+            elif action == 'keyboard':
+                result = keyboard.set_brightness(payload.get('brightness'))
+                message = ('Klavye aydınlatması kapatıldı.' if result['brightness'] == 0 else
+                           f"Klavye aydınlatması {result['brightness']}/{result['maximum']} seviyesine ayarlandı.")
             elif action == 'firmware':
                 choices = hardware.local_status()[1] or ''
                 if selection not in choices.split():

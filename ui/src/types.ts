@@ -7,6 +7,7 @@ export interface Snapshot {
   power: {mode: string | null; label: string | null; error: string | null};
   graphics: {mode: string | null; reported: string | null; reboot_required: boolean | null; error: string | null};
   firmware: {mode: string | null; choices: string[]};
+  keyboard: {available: boolean; brightness: number | null; maximum: number | null; error: string | null};
   gpu: {pci: string; state: string | null; control: string | null}[];
   events: {time: string; title: string; ok: boolean}[]; busy: boolean;
 }

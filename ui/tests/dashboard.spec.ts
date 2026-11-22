@@ -2,11 +2,13 @@ import { test, expect, type Page } from '@playwright/test';
 import { readFileSync } from 'node:fs';
 const snapshot = JSON.parse(readFileSync(new URL('./snapshot.json', import.meta.url), 'utf8'));
 
-async function setup(page:Page, failPower=false) {
+async function setup(page:Page, failPower=false, keyboardMode='available') {
   // Mimic only the Qt transport; production has no demo data or HTTP API.
   await page.route('qrc:**', route=>route.fulfill({body:'',contentType:'application/javascript'}));
-  await page.addInitScript(({snapshot, failPower})=>{
+  await page.addInitScript(({snapshot, failPower, keyboardMode})=>{
     const state=structuredClone(snapshot); state.cpu.usage=8;
+    if(keyboardMode==='missing') state.keyboard={available:false,brightness:null,maximum:null,error:'Klavye aydınlatma servisine ulaşılamadı.'};
+    if(keyboardMode==='continuous') state.keyboard={available:true,brightness:100,maximum:255,error:null};
     const calls:{action:string;payload:Record<string,unknown>}[]=[];
     (window as any).__calls=calls;
     (window as any).qt={webChannelTransport:{}};
@@ -19,6 +21,7 @@ async function setup(page:Page, failPower=false) {
           if(action==='status') data=structuredClone(state);
           else if(action==='graphics') {state.graphics.mode=payload.mode;state.graphics.reported=payload.mode==='integrated'?'compute':payload.mode;state.graphics.reboot_required=true;data={message:'Grafik modu kaydedildi. Yeniden başlattığında tamamen uygulanacak.'};}
           else if(action==='power') {if(failPower){setTimeout(()=>reply(id,JSON.stringify({ok:false,error:'Güç servisine ulaşılamadı.'})),40);return;}state.power.mode=payload.mode;data={message:'Güç profili uygulandı.'};}
+          else if(action==='keyboard') {if(keyboardMode==='failure'){setTimeout(()=>reply(id,JSON.stringify({ok:false,error:'Aydınlatma seviyesi doğrulanamadı.'})),40);return;}state.keyboard.brightness=payload.brightness;data={message:'Klavye aydınlatması ayarlandı.'};}
           else if(action==='diagnostics') data={text:JSON.stringify(state)};
           else if(action==='telemetry') data={timestamp:state.timestamp,rows:[['NVIDIA GeForce RTX 5060','44','0','2','8151','595.84']]};
           else data={message:'İşlem tamamlandı.'};
@@ -27,7 +30,7 @@ async function setup(page:Page, failPower=false) {
         ready({objects:{dashboard:bridge}});
       }
     };
-  },{snapshot,failPower});
+  },{snapshot,failPower,keyboardMode});
   await page.goto('/');
   await expect(page.locator('body')).toHaveAttribute('data-connected','true');
 }
@@ -102,4 +105,44 @@ test('missing native connection is honest and never displays fictional metrics',
   await expect(page.getByRole('alert')).toContainText('Cihaza bağlanılamadı.');
   await expect(page.locator('.energy-card')).toHaveCount(0);
   await expect(page.getByRole('button',{name:'Tekrar dene'})).toBeEnabled();
+});
+
+test('keyboard levels apply real steps and follow refreshed hardware readings',async({page})=>{
+  await setup(page);
+  await page.getByRole('button',{name:'Güç ve pil',exact:true}).click();
+  const panel=page.getByRole('region',{name:'Klavye aydınlatması',exact:true});
+  await expect(panel.getByRole('button',{name:'Düşük',exact:true})).toHaveAttribute('aria-pressed','true');
+  for(const [label,level] of [['Yüksek',2],['Kapalı',0],['Düşük',1]] as const){
+    await panel.getByRole('button',{name:label,exact:true}).click();
+    await expect(panel.getByRole('button',{name:label,exact:true})).toHaveAttribute('aria-pressed','true');
+    expect(await page.evaluate(()=>(window as any).__calls.filter((x:any)=>x.action==='keyboard').at(-1).payload)).toEqual({brightness:level});
+  }
+  await panel.scrollIntoViewIfNeeded();
+  await page.screenshot({path:'/tmp/thinkbook-keyboard-controls.png'});
+});
+
+test('keyboard service failure and unsupported hardware never fake success',async({page})=>{
+  await setup(page,false,'failure');
+  await page.getByRole('button',{name:'Güç ve pil',exact:true}).click();
+  const panel=page.getByRole('region',{name:'Klavye aydınlatması',exact:true});
+  await panel.getByRole('button',{name:'Yüksek',exact:true}).click();
+  await expect(page.getByRole('alert')).toContainText('doğrulanamadı');
+  await expect(panel.getByRole('button',{name:'Düşük',exact:true})).toHaveAttribute('aria-pressed','true');
+});
+
+test('missing keyboard service disables control without hiding other settings',async({page})=>{
+  await setup(page,false,'missing');
+  await page.getByRole('button',{name:'Güç ve pil',exact:true}).click();
+  const panel=page.getByRole('region',{name:'Klavye aydınlatması',exact:true});
+  await expect(panel).toContainText('servisine ulaşılamadı');
+  await expect(panel.getByRole('button')).toHaveCount(0);
+  await expect(page.getByRole('heading',{name:'Pop!_OS güç profili',exact:true})).toBeVisible();
+});
+
+test('higher-resolution keyboard backlights use integer slider values',async({page})=>{
+  await setup(page,false,'continuous');
+  await page.getByRole('button',{name:'Güç ve pil',exact:true}).click();
+  await page.getByRole('slider',{name:'Parlaklık: 100 / 255'}).fill('160');
+  await page.getByRole('button',{name:'Aydınlatmayı uygula',exact:true}).click();
+  await expect(page.getByLabel('Geçerli aydınlatma seviyesi')).toHaveText('Seviye 160');
 });

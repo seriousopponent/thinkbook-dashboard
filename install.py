@@ -7,7 +7,7 @@ from pathlib import Path
 import shutil
 
 SOURCE = Path(__file__).resolve().parent
-RUNTIME = ('native.py', 'service.py', 'hardware.py', 'dashboard.py', 'osd.py',
+RUNTIME = ('native.py', 'service.py', 'hardware.py', 'keyboard.py', 'dashboard.py', 'osd.py',
            'set_firmware_profile.py', 'icon.svg')
 
 

@@ -60,5 +60,11 @@
     "reported": "hybrid",
     "reboot_required": true,
     "error": null
+  },
+  "keyboard": {
+    "available": true,
+    "brightness": 1,
+    "maximum": 2,
+    "error": null
   }
 }
