@@ -1,0 +1,64 @@
+{
+  "timestamp": "2026-01-01T12:00:00",
+  "session_started": "2026-01-01T12:00:00",
+  "model": "ThinkBook 16p G6 IAX",
+  "os": "Pop!_OS 24.04 LTS",
+  "kernel": "6.8.0-generic",
+  "cpu_name": "Intel(R) Core(TM) Ultra (demo)",
+  "cpu": {
+    "usage": 12,
+    "temperature": 48
+  },
+  "memory": {
+    "total_gib": 32,
+    "used_gib": 12,
+    "percent": 38
+  },
+  "disk": {
+    "total_gib": 512,
+    "used_gib": 128,
+    "percent": 25
+  },
+  "battery": {
+    "present": true,
+    "online": true,
+    "percent": 80.0,
+    "status": "Not charging",
+    "watts": 0.0,
+    "energy_wh": 64,
+    "full_wh": 80,
+    "design_wh": 85,
+    "health": 94.1,
+    "cycles": 20,
+    "remaining_hours": null,
+    "conservation": "On"
+  },
+  "firmware": {
+    "mode": "balanced",
+    "choices": [
+      "low-power",
+      "balanced",
+      "performance"
+    ]
+  },
+  "gpu": [
+    {
+      "pci": "0000:01:00.0",
+      "state": "active",
+      "control": "on"
+    }
+  ],
+  "busy": false,
+  "events": [],
+  "power": {
+    "mode": "balanced",
+    "label": "Balanced",
+    "error": null
+  },
+  "graphics": {
+    "mode": "hybrid",
+    "reported": "hybrid",
+    "reboot_required": true,
+    "error": null
+  }
+}

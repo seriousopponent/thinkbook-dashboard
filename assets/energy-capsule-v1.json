@@ -1,0 +1,12 @@
+{
+  "asset": "energy-capsule-v1",
+  "purpose": "Decorative energy hero illustration; live battery readings remain separate",
+  "generation": {
+    "tool": "built-in image_gen",
+    "transparent_background": true,
+    "prompt": "Use case: stylized-concept.\nAsset type: a production-ready transparent 3D illustration for the energy hero card of a premium desktop laptop dashboard, not a whole UI mockup.\nPrimary request: One exceptionally refined industrial energy capsule, a battery-inspired sculptural object. A low, elongated rounded rectangular precision-machined graphite enclosure, a translucent pale lime glass inset revealing a single continuous softly illuminated inner energy core, understated satin aluminum edge rails and a small clean terminal at one end. Physically convincing polished chamfers and fine brushed metal texture. Mature industrial design, sophisticated restraint, studio product photography quality rather than a cartoon icon.\nComposition: entire single object fully visible, centered in a square image with about 12 percent transparent breathing room around it. Three-quarter elevated view, long axis running gently diagonally from lower-left to upper-right, clean strong silhouette readable at 200 CSS pixels. 85mm product lens, almost orthographic, no exaggerated perspective. Object should occupy about 80 percent of image width.\nLighting: large softbox key from upper left, controlled bright edge reflections, gentle cool rim, realistic refraction and ambient occlusion, no blown highlights. Only a faint localized soft shadow with transparent falloff if needed.\nPalette: charcoal graphite #1b211c, satin neutral aluminum, pale lime #cefa83 glass and internal accent. Designed to sit on a pale lime #d0f68d interface card; enough graphite contrast for clear separation.\nBackground: truly transparent alpha, no colored backdrop, no floor plane, no visible checkerboard.\nConstraints: this is decorative artwork, not a live battery meter. No segmented charge bars, no percent indicators, no numerals, no text, no logos, no branding, no watermark. No cables, sparks, lightning bolts, leaves, floating debris, extra objects, excessive neon glow, plastic toy surfaces, blurry details, muddy geometry, or cropped edges. Aim for a bespoke flagship product visualization with meticulous material quality."
+  },
+  "original": "originals/energy-capsule-v1.png",
+  "production": "../ui/src/assets/energy-capsule-v1.webp",
+  "processing": "Lossless WebP encoding only; original pixel dimensions and alpha preserved"
+}
