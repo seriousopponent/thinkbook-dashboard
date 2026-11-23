@@ -38,15 +38,15 @@ async function setup(page:Page, failPower=false, keyboardMode='available') {
 test('overview is live, power change is verified, telemetry is opt-in',async({page})=>{
   await page.emulateMedia({reducedMotion:'reduce'});
   await setup(page);
-  await expect(page.getByRole('heading',{name:'Genel bakış.'})).toBeVisible();
+  await expect(page.getByRole('heading',{name:'Genel bakış'})).toBeVisible();
   await expect(page.locator('[data-slot="animated-counter"]')).toHaveCount(1);
   await page.locator('.page-content img').evaluateAll(async images=>{
     for(const image of images as HTMLImageElement[]) await image.decode();
   });
   await page.evaluate(()=>document.fonts.ready);
   await page.screenshot({path:'/tmp/thinkbook-overview-docs.png'});
-  await page.getByRole('button',{name:'Tasarruf Daha uzun pil süresi'}).click();
-  await expect(page.getByRole('button',{name:'Tasarruf Daha uzun pil süresi'})).toHaveAttribute('aria-pressed','true');
+  await page.getByRole('button',{name:'Tasarruf'}).click();
+  await expect(page.getByRole('button',{name:'Tasarruf'})).toHaveAttribute('aria-pressed','true');
   await expect(page.getByRole('status')).toContainText('Güç profili uygulandı');
   expect(await page.evaluate(()=>(window as any).__calls.filter((x:any)=>x.action==='telemetry').length)).toBe(0);
   await page.screenshot({path:'/tmp/thinkbook-overview.png',fullPage:true});
@@ -56,16 +56,16 @@ test('all graphics modes, pending reboot, and safe cancellation',async({page})=>
   await setup(page);
   await page.getByRole('button',{name:'Grafik modları',exact:true}).click();
   await expect(page.getByRole('button',{name:'Modu uygula'})).toBeDisabled();
-  await page.getByRole('button',{name:/DAHA UZUN PİL Yalnızca Intel/}).click();
+  await page.getByRole('button',{name:'Yalnızca Intel',exact:true}).click();
   await expect(page.getByText(/HDMI ve diğer harici ekran/)).toBeVisible();
   await page.getByRole('button',{name:'Modu uygula'}).click();
   await expect(page.locator('.graphics-summary h2')).toHaveText('Yalnızca Intel');
   await expect(page.getByRole('button',{name:'Modu uygula'})).toBeDisabled();
   await page.getByText('Gelişmiş seçenek',{exact:true}).click();
-  await page.getByRole('button',{name:/Hesaplama · Intel/}).click();
+  await page.getByRole('button',{name:'Hesaplama',exact:true}).click();
   await page.getByRole('button',{name:'Modu uygula'}).click();
   await expect(page.locator('.graphics-summary h2')).toHaveText('Hesaplama');
-  await page.getByRole('button',{name:/TAM PERFORMANS NVIDIA/}).click();
+  await page.getByRole('button',{name:'NVIDIA',exact:true}).click();
   await page.getByRole('button',{name:'Modu uygula'}).click();
   await expect(page.locator('.graphics-summary h2')).toHaveText('NVIDIA');
   await page.getByRole('button',{name:/Yeniden başlat/}).click();
@@ -81,9 +81,9 @@ test('all graphics modes, pending reboot, and safe cancellation',async({page})=>
 
 test('backend failure leaves the old profile selected and shows the reason',async({page})=>{
   await setup(page,true);
-  await page.getByRole('button',{name:'Performans İhtiyaç duyduğun tüm güç'}).click();
+  await page.getByRole('button',{name:'Performans'}).click();
   await expect(page.getByRole('alert')).toContainText('Güç servisine ulaşılamadı.');
-  await expect(page.getByRole('button',{name:'Dengeli Güç ve performans dengesi'})).toHaveAttribute('aria-pressed','true');
+  await expect(page.getByRole('button',{name:'Dengeli'})).toHaveAttribute('aria-pressed','true');
 });
 
 test('narrow window, light theme, reduced motion, and diagnostic copy',async({page})=>{
@@ -93,7 +93,7 @@ test('narrow window, light theme, reduced motion, and diagnostic copy',async({pa
   await page.getByRole('button',{name:'Açık temaya geç'}).click();
   await expect(page.locator('html')).toHaveAttribute('data-theme','light');
   await page.locator('[data-slot="bounce-sidebar-item"]').nth(3).click();
-  await expect(page.getByRole('heading',{name:'Sistem.'})).toBeVisible();
+  await expect(page.getByRole('heading',{name:'Sistem'})).toBeVisible();
   await page.getByRole('button',{name:'Tanılama bilgisini kopyala'}).click();
   await expect.poll(()=>page.evaluate(()=>(window as any).__clipboard)).toContain('ThinkBook');
   expect(await page.evaluate(()=>document.querySelector('main')!.scrollWidth<=document.querySelector('main')!.clientWidth)).toBe(true);
@@ -136,7 +136,7 @@ test('missing keyboard service disables control without hiding other settings',a
   const panel=page.getByRole('region',{name:'Klavye aydınlatması',exact:true});
   await expect(panel).toContainText('servisine ulaşılamadı');
   await expect(panel.getByRole('button')).toHaveCount(0);
-  await expect(page.getByRole('heading',{name:'Pop!_OS güç profili',exact:true})).toBeVisible();
+  await expect(page.getByRole('heading',{name:'Güç profili',exact:true})).toBeVisible();
 });
 
 test('higher-resolution keyboard backlights use integer slider values',async({page})=>{
@@ -145,4 +145,28 @@ test('higher-resolution keyboard backlights use integer slider values',async({pa
   await page.getByRole('slider',{name:'Parlaklık: 100 / 255'}).fill('160');
   await page.getByRole('button',{name:'Aydınlatmayı uygula',exact:true}).click();
   await expect(page.getByLabel('Geçerli aydınlatma seviyesi')).toHaveText('Seviye 160');
+});
+
+test('all redesigned pages remain usable in both themes at desktop minimum width',async({page})=>{
+  await page.emulateMedia({reducedMotion:'reduce'});
+  await setup(page);
+  const tabs=['Genel bakış','Güç ve pil','Grafik modları','Sistem'];
+  for(const [width,height] of [[1180,850],[760,650]]){
+    await page.setViewportSize({width,height});
+    for(const theme of ['dark','light']){
+      if(await page.locator('html').getAttribute('data-theme')!==theme){
+        await page.getByRole('button',{name:theme==='light'?'Açık temaya geç':'Koyu temaya geç'}).click();
+      }
+      for(let tab=0;tab<tabs.length;tab++){
+        await page.getByRole('button',{name:tabs[tab],exact:true}).click();
+        await expect(page.getByRole('heading',{name:tabs[tab],level:1,exact:true})).toBeVisible();
+        await page.evaluate(()=>document.fonts.ready);
+        await page.locator('.page-content img').evaluateAll(async images=>{for(const img of images as HTMLImageElement[])await img.decode();});
+        expect(await page.locator('main').evaluate(el=>el.scrollWidth<=el.clientWidth)).toBe(true);
+        const panel=page.getByRole('region',{name:'Klavye aydınlatması',exact:true});
+        if(tab<2) await expect(panel.getByRole('button',{name:'Yüksek',exact:true})).toBeInViewport({ratio:1});
+        await page.screenshot({path:`/tmp/thinkbook-redesign-${width}-${theme}-${tab}.png`});
+      }
+    }
+  }
 });

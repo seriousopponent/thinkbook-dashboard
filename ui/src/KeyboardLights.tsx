@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Check, Keyboard, Sun } from 'lucide-react';
+import { Keyboard } from 'lucide-react';
 import type { Snapshot } from './types';
 
 export function KeyboardLights({state, disabled, onChange}: {
@@ -13,17 +13,16 @@ export function KeyboardLights({state, disabled, onChange}: {
     maximum === 2 ? (value === 1 ? 'Düşük' : 'Yüksek') : `Seviye ${value}`;
 
   return <section className="panel keyboard-panel" aria-labelledby="keyboard-title">
-    <div className="panel-heading"><h2 id="keyboard-title"><Keyboard size={19}/>Klavye aydınlatması</h2>
-      {available && <span className="badge green" aria-label="Geçerli aydınlatma seviyesi">{label(state.brightness!)}</span>}
+    <div className="section-heading"><h2 id="keyboard-title"><Keyboard size={19}/>Klavye aydınlatması</h2>
+      <span className="shortcut"><kbd>Fn</kbd> + <kbd>Space</kbd></span>
     </div>
-    <p className="panel-description">Tuşların ışığını bulunduğun ortama göre ayarla. Değişiklik anında uygulanır.</p>
     {available ? <>
-      {maximum <= 4 ? <div className="keyboard-levels" role="group" aria-label="Klavye aydınlatma seviyesi">
+      {maximum <= 4 ? <div className="segmented control-body" role="group" aria-label="Klavye aydınlatma seviyesi">
         {Array.from({length: maximum + 1}, (_, level) => <button key={level}
-          className={`keyboard-level ${state.brightness === level ? 'selected' : ''}`}
+          className={state.brightness === level ? 'selected' : ''}
           disabled={disabled || state.brightness === level} aria-pressed={state.brightness === level}
           onClick={() => onChange(level)}>
-          <Sun size={18}/><span>{label(level)}</span>{state.brightness === level && <Check size={16}/>}
+          {label(level)}
         </button>)}
       </div> : <div className="keyboard-slider">
         <label htmlFor="keyboard-brightness">Parlaklık: {draft} / {maximum}</label>
@@ -31,7 +30,7 @@ export function KeyboardLights({state, disabled, onChange}: {
           value={draft} disabled={disabled} onChange={event => setDraft(Number(event.target.value))}/>
         <button className="button primary" disabled={disabled || draft === state.brightness} onClick={() => onChange(draft)}>Aydınlatmayı uygula</button>
       </div>}
-      <p className="keyboard-hint"><kbd>Fn</kbd> + <kbd>Space</kbd><span>ThinkBook’ta klavyeden de değiştirebilirsin.</span></p>
+      <span className="sr-only" aria-label="Geçerli aydınlatma seviyesi">{label(state.brightness!)}</span>
     </> : <p className="inline-error">{state?.error || 'Klavye aydınlatma bilgisi okunamıyor.'}</p>}
   </section>;
 }

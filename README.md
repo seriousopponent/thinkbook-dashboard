@@ -13,7 +13,7 @@ The interface is in **Turkish**, with dark and light themes. No account, cloud s
 - **Battery:** charge, capacity, health, cycle count, and conservation-mode status when exposed by Linux.
 - **Keyboard lighting:** off, low, and high on two-step ThinkBook backlights, or an integer slider for devices with more levels; changes are verified through UPower.
 - **System:** CPU load and temperature, memory, storage, session activity, and redacted diagnostic export.
-- **Interface:** responsive layout, reduced-motion support, bundled fonts, and custom static hardware artwork.
+- **Interface:** neutral dark and light themes, compact controls, reduced-motion support, and bundled fonts. Power profiles and keyboard lighting are available directly on the overview.
 
 The screenshot uses synthetic test readings. The desktop app reads the actual machine; it does not fall back to demonstration data.
 
@@ -111,6 +111,6 @@ The native smoke test uses the real read-only bridge and writes `/tmp/thinkbook-
 
 ## Artwork and credits
 
-The energy capsule, processor, memory, storage, and laptop illustrations were generated with ImageGen. Original transparent PNGs are in `assets/originals`; the UI uses lossless WebP files in `ui/src/assets`. These are decorative concepts, not exact branded product photographs or live indicators. Generation prompts are included in [the energy manifest](assets/energy-capsule-v1.json) and [the hardware manifest](assets/hardware-set-v1.json).
+The system page uses a restrained laptop illustration. The previously generated energy capsule, processor, memory, storage, and laptop artwork remains available in the repository; the overview now prioritizes readings and controls over decorative images. All five illustrations were generated with ImageGen. Original transparent PNGs are in `assets/originals`; the UI uses lossless WebP files in `ui/src/assets`. These are decorative concepts, not exact branded product photographs or live indicators. Generation prompts are included in [the energy manifest](assets/energy-capsule-v1.json) and [the hardware manifest](assets/hardware-set-v1.json).
 
 [Bounce Sidebar and Animated Counter from Rare UI](https://rareui.com), by [Swami Malode](https://github.com/swamimalode07/rare-ui), are adapted for local desktop navigation and reduced-motion handling. Their MIT notice is preserved in [ui/licenses/rare-ui-MIT.txt](ui/licenses/rare-ui-MIT.txt). Icons are from Lucide; Geist fonts are bundled through Fontsource. Qt, PyQt, GTK and other dependencies retain their respective licenses and are installed separately; machine-specific vendor binaries are not included in this repository.

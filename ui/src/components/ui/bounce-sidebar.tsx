@@ -111,13 +111,13 @@ export function BounceSidebar({
   return (
     <ul
       data-slot="bounce-sidebar"
-      className={cn("relative flex flex-col gap-1 pl-6", className)}
+      className={cn("relative flex flex-col gap-1 pl-2", className)}
       {...props}
     >
       <span
         ref={dot}
         aria-hidden
-        className="absolute left-2 top-0 rounded-full transition-opacity duration-150"
+        className="absolute left-0 top-0 rounded-full transition-opacity duration-150"
         style={{
           width: dotSize,
           height: dotSize,
